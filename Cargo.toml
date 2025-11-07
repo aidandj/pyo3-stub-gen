@@ -7,7 +7,6 @@ members = [
   "examples/mixed_sub",
   "examples/test-dash-package",
   "examples/feature_gated",
-  "examples/mixed_sub_multiple",
   "examples/empty_super_module",
 ]
 resolver = "2"
