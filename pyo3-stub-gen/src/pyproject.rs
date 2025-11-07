@@ -60,6 +60,24 @@ impl PyProject {
         }
         None
     }
+
+    /// Return the output directory for stub files.
+    /// Uses `tool.pyo3-stub-gen.output-dir` if specified, otherwise falls back to `python_source()`.
+    pub fn output_dir(&self) -> Option<PathBuf> {
+        if let Some(tool) = &self.tool {
+            if let Some(config) = &tool.pyo3_stub_gen {
+                if let Some(output_dir) = &config.output_dir {
+                    return Some(
+                        self.toml_path
+                            .parent()
+                            .map(|base| base.join(output_dir))
+                            .unwrap_or_else(|| PathBuf::from(output_dir)),
+                    );
+                }
+            }
+        }
+        self.python_source()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -70,6 +88,8 @@ pub struct Project {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Tool {
     pub maturin: Option<Maturin>,
+    #[serde(rename = "pyo3-stub-gen")]
+    pub pyo3_stub_gen: Option<Pyo3StubGen>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -78,4 +98,11 @@ pub struct Maturin {
     pub python_source: Option<String>,
     #[serde(rename = "module-name")]
     pub module_name: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Pyo3StubGen {
+    pub module: Option<String>,
+    #[serde(rename = "output-dir")]
+    pub output_dir: Option<String>,
 }

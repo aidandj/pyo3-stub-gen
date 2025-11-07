@@ -63,12 +63,16 @@ struct StubInfoBuilder {
 
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject) -> Self {
-        StubInfoBuilder::from_project_root(
-            pyproject.module_name().to_string(),
-            pyproject
-                .python_source()
-                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
-        )
+        let default_module_name = pyproject.module_name().to_string();
+        let python_root = pyproject
+            .output_dir()
+            .unwrap_or_else(|| PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+
+        Self {
+            modules: BTreeMap::new(),
+            default_module_name,
+            python_root,
+        }
     }
 
     fn from_project_root(default_module_name: String, project_root: PathBuf) -> Self {
